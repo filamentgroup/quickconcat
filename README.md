@@ -11,19 +11,19 @@ concat.php accepts 2 query strings:
 
 Example CSS url: 
 
-    quickconcat.php?css/a.css,css/b.css,css/c.css
+    quickconcat.php?files=css/a.css,css/b.css,css/c.css
 
 Example JS url:
 
-    quickconcat.php?js/a.js,css/b.js,css/c.js
+    quickconcat.php?files=js/a.js,css/b.js,css/c.js
 
 Example HTML url: 
 
-    quickconcat.php?a.html,b.html,c.html
+    quickconcat.php?files=a.html,b.html,c.html
 
 Example HTML url with wrapped entries:
 
-    quickconcat.php?a.html,b.html,c.html&wrap
+    quickconcat.php?files=a.html,b.html,c.html&wrap
 
 Note that when `wrap` is passed, like above, each file will be wrapped in a `entry` element with a `url` attribute corresponding to the URL from which the content was included. For example:
 
