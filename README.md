@@ -6,6 +6,7 @@ a simple dynamic concatenator for html, css, and js files, written in PHP
 * Dual licensed under MIT and GPLv2
 
 concat.php accepts 2 query strings: 
+
 		* files (required): a comma-separated list of root-relative file paths
 		* wrap (optional): Enclose each result in an element node with url attribute? False by default.
 
