@@ -16,7 +16,7 @@ Example CSS url:
 
 Example JS url:
 
-    quickconcat.php?files=js/a.js,css/b.js,css/c.js
+    quickconcat.php?files=js/a.js,js/b.js,js/c.js
 
 Example HTML url: 
 
