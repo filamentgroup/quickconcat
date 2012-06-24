@@ -29,8 +29,16 @@ $fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
 $ftype = $fext ? $match[ 1 ] : "html";
 $type = "text/" . ( $ftype === "js" ? "javascript" : $ftype );
 
-$cache_dir =  __DIR__ . '/.quickconcat-cache';
-$cache_name = $cache_dir . '/' . md5( $filelist . ($wrap ? 'wrap' : '') );
+if ( ! $nocache ) {
+	// Get file last modified time
+	$cache_string = '';
+	foreach ( $files as $file ) {
+		$cache_string = $file . filemtime($file);
+	}
+
+	$cache_dir =  __DIR__ . '/.quickconcat-cache';
+	$cache_name = $cache_dir . '/' . md5( $cache_string . ($wrap ? 'wrap' : '') );
+}
 
 // See if cached copy exists
 if ( ! $nocache && file_exists($cache_name) ) {
