@@ -3,7 +3,7 @@
 a simple dynamic concatenator for html, css, and js files, written in PHP
 
 * Copyright 2012, Scott Jehl, Filament Group, Inc. 
-* Dual licensed under MIT and GPLv2
+* Dual licensed under MIT and GPLv3
 
 concat.php accepts 2 query strings: 
 
