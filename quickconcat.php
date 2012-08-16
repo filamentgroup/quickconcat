@@ -42,9 +42,9 @@ foreach ( $files as $file ) {
 		//prefix relative CSS paths (TODO: HTML as well)
 		if( $ftype === "css" ){
 			$prefix = $pubroot . dirname($file) . "/";
-			$newcontents = preg_replace( '/(url\("?)([^\/])([^\:\)]+"?\))/', "$1" . $prefix .  "$2$3", $newcontents );
+			$newcontents = preg_replace( '/(url\(["\']?)([^\/])([^\:\)]+["\']?\))/', "$1" . $prefix .  "$2$3", $newcontents );
 			//temp cleanup for root-relative paths that aren't caught when quoted above. should be doable in one replace above
-			$newcontents = preg_replace( '/(url\()([^"]+)(")/', "$1$3", $newcontents ); 
+			$newcontents = preg_replace( '/(url\()([^"\']+)(["\'])/', "$1$3", $newcontents ); 
 		}
 		$contents .= $newcontents;
 	}
