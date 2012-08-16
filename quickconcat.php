@@ -25,6 +25,17 @@ if ( ! isset( $filelist ) ){
 }
 
 $files = explode( ",", $filelist );
+$appRoot = dirname(__FILE__);
+
+// sanitize file-parameters
+foreach ( $files as $idx => $file ) {
+		// we allow only certain filetypes
+	// all files must be contained in the same folder or in one of our subfolders
+	if( !preg_match( '/\.(js|html|css)$/', $file ) || 
+		strpos(realpath($file), $appRoot) !== 0){
+		unset($files[$idx]);
+	}
+}
 
 // Guess file type
 $fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
@@ -35,7 +46,6 @@ $contents = '';
 
 // Loop through the files adding them to a string
 foreach ( $files as $file ) {
-	if( preg_match( '/\.(js|html|css)$/', $file ) ){
 		$open = $wrap ? "<entry url=\"". $file . "\">" : "";
 		$close = $wrap ? "</entry>\n" : "";
 		$newcontents = $open . file_get_contents($relativeroot . $file). $close;
@@ -47,7 +57,6 @@ foreach ( $files as $file ) {
 			$newcontents = preg_replace( '/(url\()([^"\']+)(["\'])/', "$1$3", $newcontents ); 
 		}
 		$contents .= $newcontents;
-	}
 }
 
 // Set the content type and filesize headers
