@@ -6,11 +6,12 @@ quickconcat: a simple dynamic concatenator for html, css, and js files
 		* files (required): a comma-separated list of root-relative file paths
 		* wrap (optional): Enclose each result in an element node with url attribute? False by default.
 */
+
 // List of files, comma-separated paths
-$filelist = $_REQUEST[ "files" ];
+$filelist = $_REQUEST[ 'files' ];
 
 // Enclose each result in an element node with url attribute?
-$wrap = isset( $_REQUEST[ "wrap" ] );
+$wrap = isset( $_REQUEST[ 'wrap' ] );
 
 // Get the filetype and array of files
 if ( ! isset( $filelist ) ){
@@ -18,36 +19,68 @@ if ( ! isset( $filelist ) ){
 	exit;
 }
 
-$files = explode( ",", $filelist );
+$files = explode( ',', $filelist );
+$ftype = null;
 $appRoot = dirname(__FILE__);
 
 // sanitize file-parameters
 foreach ( $files as $idx => $file ) {
     // we allow only certain filetypes
 	// all files must be contained in the same folder or in one of our subfolders
-	if( !preg_match( '/\.(js|html|css)$/', $file ) || 
+	if( !($fext = preg_match( '/\.(js|html|css)$/', $file, $match )) || 
 		strpos(realpath($file), $appRoot) !== 0){
 		unset($files[$idx]);
+	} else if (!$ftype && $match) {
+		// Guess file type
+		$type = $fext ? $match[ 1 ] : 'html';
+		$ftype = 'text/' . ( $type === 'js' ? 'javascript' : $type );
 	}
 }
 
-// Guess file type
-$fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
-$ftype = $fext ? $match[ 1 ] : "html";
-$type = "text/" . ( $ftype === "js" ? "javascript" : $ftype );
-
-$contents = '';
-
-// Loop through the files adding them to a string
-foreach ( $files as $file ) {
-	$open = $wrap ? "<entry url=\"". $file . "\">" : "";
-	$close = $wrap ? "</entry>\n" : "";
-	$contents .= $open . file_get_contents($file). $close;
+// collect metadata
+$fps = array();
+$fsize = 0;
+$lmodified = 0;
+foreach ( $files as $idx => $file ) {
+	$fps[$idx] = fopen($file, 'rb');
+	
+	$fsize += filesize($file);
+	// account for additional chars which will be added due to wrapping
+	if($wrap) {
+		$fsize += 14; // <entry url="">
+		$fsize += strlen($file); // the url itself
+		$fsize += 8; // </entry>
+	}
+	
+	$mtime = filemtime($file);
+	if($mtime > $lmodified) {
+		$lmodified = $mtime;
+	}
 }
 
-// Set the content type and filesize headers
-header('Content-Type: ' . $type);
-header('Content-Length: ' . strlen($contents));
+// fast exit, in case the browsers-cache is up2date
+if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $_SERVER['HTTP_IF_MODIFIED_SINCE'] == $lmodified) {
+	header('HTTP/1.1 304 Not Modified');
+	exit();
+}
 
-// Deliver the file
-echo $contents;
+// Set the content type, length and last-modification stamp
+header('Content-Type: ' . $ftype);
+header('Content-Length: ' . $fsize);
+header('Last-Modified: '. $lmodified);
+
+// Deliver the files
+foreach ( $fps as $idx => $fp ) {
+	if ($fp) {
+		if($wrap) {
+			// in case you change the markup here, don't forget to update the corresponding filesize additions
+			echo '<entry url="'. $files[$idx] . '">';
+			fpassthru($fp);
+			echo '</entry>';
+		}
+		else {
+			fpassthru($fp);
+		}
+		fclose($fp);
+	}
+}
