@@ -38,11 +38,6 @@ foreach ( $files as $idx => $file ) {
 	}
 }
 
-// Guess file type
-$fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
-$ftype = $fext ? $match[ 1 ] : "html";
-$type = "text/" . ( $ftype === "js" ? "javascript" : $ftype );
-
 $lmodified = 0;
 
 // build last-modified date for the file-bundle
@@ -58,6 +53,11 @@ if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $lmodified > 0 && $_SERVER['HTT
 	header('HTTP/1.1 304 Not Modified');
 	exit();
 }
+
+// Guess file type
+$fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
+$ftype = $fext ? $match[ 1 ] : "html";
+$type = "text/" . ( $ftype === "js" ? "javascript" : $ftype );
 
 $contents = '';
 
