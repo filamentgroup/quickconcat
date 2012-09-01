@@ -7,4 +7,4 @@ before_script:
   - wget http://getcomposer.org/composer.phar
   - php composer.phar install
   - php test/testServer.php &
-  - phpunit
+  - phpunit test/tests/
