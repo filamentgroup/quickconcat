@@ -1,0 +1,12 @@
+language: php
+ 
+php:
+  - 5.4
+ 
+before_script:
+  - wget http://getcomposer.org/composer.phar
+  - php composer.phar install
+  - php test/testServer.php &
+  
+script:  
+  - phpunit test/tests/
