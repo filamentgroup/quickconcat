@@ -27,30 +27,34 @@ if ( ! isset( $filelist ) ){
 
 $files = explode( ",", $filelist );
 $appRoot = dirname(__FILE__);
-$ftype = null;
-$lmodified = 0;
 
 // sanitize file-parameters
 foreach ( $files as $idx => $file ) {
-    // we allow only certain filetypes
+	// we allow only certain filetypes
 	// all files must be contained in the same folder or in one of our subfolders
-	if( !($fext = preg_match( '/\.(js|html|css)$/', $file, $match )) || 
+	if( !preg_match( '/\.(js|html|css)$/', $file ) ||
 		strpos(realpath($file), $appRoot) !== 0){
 		unset($files[$idx]);
-	} else if (!$ftype && $match) {
-		// Guess file type
-		$type = $fext ? $match[ 1 ] : 'html';
-		$ftype = 'text/' . ( $type === 'js' ? 'javascript' : $type );
-		
-		$mtime = filemtime($file);
-		if($mtime > $lmodified) {
-			$lmodified = $mtime;
-		}
+	}
+}
+
+// Guess file type
+$fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
+$ftype = $fext ? $match[ 1 ] : "html";
+$type = "text/" . ( $ftype === "js" ? "javascript" : $ftype );
+
+$lmodified = 0;
+
+// build last-modified date for the file-bundle
+foreach ( $files as $file ) {
+	$mtime = filemtime($file);
+	if($mtime > $lmodified) {
+		$lmodified = $mtime;
 	}
 }
 
 // fast exit, in case the browsers-cache is up2date
-if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $_SERVER['HTTP_IF_MODIFIED_SINCE'] == $lmodified) {
+if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $lmodified > 0 && $_SERVER['HTTP_IF_MODIFIED_SINCE'] == $lmodified) {
 	header('HTTP/1.1 304 Not Modified');
 	exit();
 }
@@ -61,6 +65,7 @@ $contents = '';
 foreach ( $files as $file ) {
 	$open = $wrap ? "<entry url=\"". $file . "\">" : "";
 	$close = $wrap ? "</entry>\n" : "";
+	
 	$newcontents = $open . file_get_contents($relativeroot . $file). $close;
 	//prefix relative CSS paths (TODO: HTML as well)
 	if( $ftype === "css" ){
