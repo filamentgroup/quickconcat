@@ -9,6 +9,8 @@ concat.php accepts 2 query strings:
 
 		* files (required): a comma-separated list of root-relative file paths
 		* wrap (optional): Enclose each result in an element node with url attribute? False by default.
+		
+[![Build Status](https://secure.travis-ci.org/staabm/quickconcat.png?branch=tests)](http://travis-ci.org/staabm/quickconcat)
 
 Example CSS url: 
 
