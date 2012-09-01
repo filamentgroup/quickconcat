@@ -2,13 +2,19 @@
 /*
 quickconcat: a simple dynamic concatenator for html, css, and js files
 	Copyright 2012, Scott Jehl, Filament Group, Inc. Dual licensed under MIT and GPLv2
-	*  accepts 2 query strings: 
-		* files (required): a comma-separated list of root-relative file paths
-		* wrap (optional): Enclose each result in an element node with url attribute? False by default.
+	*  accepts 2 query strings:
+	* files (required): a comma-separated list of root-relative file paths
+	* wrap (optional): Enclose each result in an element node with url attribute? False by default.
 */
 
 // List of files, comma-separated paths
 $filelist = $_REQUEST[ 'files' ];
+
+// If quickconcat is in a directory off the root, add a relative path here back to the root, like "../"
+$relativeroot = "";
+
+// get the public path to this file, plus the baseurl
+$pubroot = dirname( $_SERVER['PHP_SELF'] ) . "/" . $relativeroot;
 
 // Enclose each result in an element node with url attribute?
 $wrap = isset( $_REQUEST[ 'wrap' ] );
@@ -19,9 +25,10 @@ if ( ! isset( $filelist ) ){
 	exit;
 }
 
-$files = explode( ',', $filelist );
-$ftype = null;
+$files = explode( ",", $filelist );
 $appRoot = dirname(__FILE__);
+$ftype = null;
+$lmodified = 0;
 
 // sanitize file-parameters
 foreach ( $files as $idx => $file ) {
@@ -34,60 +41,43 @@ foreach ( $files as $idx => $file ) {
 		// Guess file type
 		$type = $fext ? $match[ 1 ] : 'html';
 		$ftype = 'text/' . ( $type === 'js' ? 'javascript' : $type );
-	}
-}
-
-// collect metadata
-$fps = array();
-$fsize = 0;
-$lmodified = 0;
-foreach ( $files as $idx => $file ) {
-	$fps[$idx] = fopen($file, 'rb');
-	
-	$fsize += filesize($file);
-	// account for additional chars which will be added due to wrapping
-	if($wrap) {
-		$fsize += 14; // <entry url="">
-		$fsize += strlen($file); // the url itself
-		$fsize += 8; // </entry>
-	}
-	
-	$mtime = filemtime($file);
-	if($mtime > $lmodified) {
-		$lmodified = $mtime;
+		
+		$mtime = filemtime($file);
+		if($mtime > $lmodified) {
+			$lmodified = $mtime;
+		}
 	}
 }
 
 // fast exit, in case the browsers-cache is up2date
 if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $_SERVER['HTTP_IF_MODIFIED_SINCE'] == $lmodified) {
-    // close all pending resources
-	foreach ( $fps as $fp ) {
-		if ($fp) {
-			fclose($fp);
-		}
-	}
-	
 	header('HTTP/1.1 304 Not Modified');
 	exit();
 }
 
-// Set the content type, length and last-modification stamp
-header('Content-Type: ' . $ftype);
-header('Content-Length: ' . $fsize);
-header('Last-Modified: '. $lmodified);
+$contents = '';
 
-// Deliver the files
-foreach ( $fps as $idx => $fp ) {
-	if ($fp) {
-		if($wrap) {
-			// in case you change the markup here, don't forget to update the corresponding filesize additions
-			echo '<entry url="'. $files[$idx] . '">';
-			fpassthru($fp);
-			echo '</entry>';
-		}
-		else {
-			fpassthru($fp);
-		}
-		fclose($fp);
+// Loop through the files adding them to a string
+foreach ( $files as $file ) {
+	$open = $wrap ? "<entry url=\"". $file . "\">" : "";
+	$close = $wrap ? "</entry>\n" : "";
+	$newcontents = $open . file_get_contents($relativeroot . $file). $close;
+	//prefix relative CSS paths (TODO: HTML as well)
+	if( $ftype === "css" ){
+		$prefix = $pubroot . dirname($file) . "/";
+		$newcontents = preg_replace( '/(url\(["\']?)([^\/])([^\:\)]+["\']?\))/', "$1" . $prefix .  "$2$3", $newcontents );
+		//temp cleanup for root-relative paths that aren't caught when quoted above. should be doable in one replace above
+		$newcontents = preg_replace( '/(url\()([^"\']+)(["\'])/', "$1$3", $newcontents ); 
 	}
+	$contents .= $newcontents;
 }
+
+// Set the content type and filesize headers
+header('Content-Type: ' . $type);
+header('Content-Length: ' . strlen($contents));
+if ($lmodified > 0) {
+	header('Last-Modified: '. $lmodified);
+}
+
+// Deliver the file
+echo $contents;
