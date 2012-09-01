@@ -60,6 +60,13 @@ foreach ( $files as $idx => $file ) {
 
 // fast exit, in case the browsers-cache is up2date
 if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $_SERVER['HTTP_IF_MODIFIED_SINCE'] == $lmodified) {
+    // close all pending resources
+	foreach ( $fps as $fp ) {
+		if ($fp) {
+			fclose($fp);
+		}
+	}
+	
 	header('HTTP/1.1 304 Not Modified');
 	exit();
 }
