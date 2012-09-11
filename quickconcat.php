@@ -39,7 +39,8 @@ foreach ( $files as $idx => $file ) {
 
 // Find the first index still set
 for ( $idx = 0; ! isset( $files[ $idx ] ); $idx++ )
-	null;
+	if ( $idx > count( $files ) )
+		exit;
 
 // Guess file type
 $fext = preg_match( '/\.(js|html|css)$/', $files[ $idx ], $match );
