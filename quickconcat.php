@@ -37,13 +37,12 @@ foreach ( $files as $idx => $file ) {
 	}
 }
 
-// Find the first index still set
-for ( $idx = 0; ! isset( $files[ $idx ] ); $idx++ )
-	if ( $idx > count( $files ) )
-		exit;
-
+$files = array_values( $files );
+if( count( $files ) == 0 ){
+	exit;
+}
 // Guess file type
-$fext = preg_match( '/\.(js|html|css)$/', $files[ $idx ], $match );
+$fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
 $ftype = $fext ? $match[ 1 ] : "html";
 $type = "text/" . ( $ftype === "js" ? "javascript" : $ftype );
 
