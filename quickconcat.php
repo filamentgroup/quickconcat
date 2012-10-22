@@ -31,7 +31,7 @@ $appRoot = dirname(__FILE__);
 foreach ( $files as $idx => $file ) {
 	// we allow only certain filetypes
 	// all files must be contained in the same folder or in one of our subfolders
-	if( !preg_match( '/\.(js|html|css)$/', $file ) || 
+	if( !preg_match( '/\.(js|html|css)$/', $file ) ||
 		strpos(realpath($file), $appRoot) !== 0){
 		unset($files[$idx]);
 	}
@@ -40,6 +40,22 @@ foreach ( $files as $idx => $file ) {
 $files = array_values( $files );
 if( count( $files ) == 0 ){
 	exit;
+}
+
+$lmodified = 0;
+
+// build last-modified date for the file-bundle
+foreach ( $files as $file ) {
+	$mtime = filemtime($file);
+	if($mtime > $lmodified) {
+		$lmodified = $mtime;
+	}
+}
+
+// fast exit, in case the browsers-cache is up2date
+if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && $lmodified > 0 && $_SERVER['HTTP_IF_MODIFIED_SINCE'] == $lmodified) {
+	header('HTTP/1.1 304 Not Modified');
+	exit();
 }
 // Guess file type
 $fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
@@ -58,7 +74,7 @@ foreach ( $files as $file ) {
 		$prefix = $pubroot . dirname($file) . "/";
 		$newcontents = preg_replace( '/(url\(["\']?)([^\/])([^\:\)]+["\']?\))/', "$1" . $prefix .  "$2$3", $newcontents );
 		//temp cleanup for root-relative paths that aren't caught when quoted above. should be doable in one replace above
-		$newcontents = preg_replace( '/(url\()([^"\']+)(["\'])/', "$1$3", $newcontents ); 
+		$newcontents = preg_replace( '/(url\()([^"\']+)(["\'])/', "$1$3", $newcontents );
 	}
 	$contents .= $newcontents;
 }
@@ -66,8 +82,10 @@ foreach ( $files as $file ) {
 // Set the content type and filesize headers
 header('Content-Type: ' . $type);
 header('Content-Length: ' . strlen($contents));
+if ($lmodified > 0) {
+	header('Last-Modified: '. $lmodified);
+}
 
 // Deliver the file
 echo $contents;
-
 
