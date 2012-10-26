@@ -30,10 +30,15 @@ $appRoot = dirname(__FILE__);
 // sanitize file-parameters
 foreach ( $files as $idx => $file ) {
 	// we allow only certain filetypes
-	// all files must be contained in the same folder or in one of our subfolders
-	if( !preg_match( '/\.(js|html|css)$/', $file ) ||
-		strpos(realpath($file), $appRoot) !== 0){
+	if( !preg_match( '/\.(js|html|css)$/', $file ))  {
 		unset($files[$idx]);
+	}
+	// all files must be contained in the same folder or in one of our subfolders
+	else {
+		$realpath = realpath($file);
+		if(!$file || !is_file($realpath) || strpos($realpath, $appRoot) !== 0){
+			unset($files[$idx]);
+		}
 	}
 }
 
