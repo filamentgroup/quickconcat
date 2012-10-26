@@ -6,6 +6,15 @@ quickconcat: a simple dynamic concatenator for html, css, and js files
 		* files (required): a comma-separated list of root-relative file paths
 		* wrap (optional): Enclose each result in an element node with url attribute? False by default.
 */
+
+function is_file_in_scope( $file ){
+	$appRoot = dirname(__FILE__);
+	$realpath = realpath($file);
+	if($file && is_file($realpath) && strpos($realpath, $appRoot) === 0){
+		return true;
+	}
+}
+
 // List of files, comma-separated paths
 $filelist = $_REQUEST[ "files" ];
 
@@ -25,14 +34,11 @@ if ( ! isset( $filelist ) ){
 }
 
 $files = explode( ",", $filelist );
-$appRoot = dirname(__FILE__);
 
 // sanitize file-parameters
 foreach ( $files as $idx => $file ) {
 	// we allow only certain filetypes
-	// all files must be contained in the same folder or in one of our subfolders
-	if( !preg_match( '/\.(js|html|css)$/', $file ) ||
-		strpos(realpath($file), $appRoot) !== 0){
+	if( !( preg_match( '/\.(js|html|css)$/', $file ) && is_file_in_scope($file) ) ){
 		unset($files[$idx]);
 	}
 }
@@ -72,7 +78,9 @@ foreach ( $files as $file ) {
 	//prefix relative CSS paths (TODO: HTML as well)
 	if( $ftype === "css" ){
 		$prefix = $pubroot . dirname($file) . "/";
-		$newcontents = preg_replace( '/(url\(["\']?)([^\/"\'])([^\:\)]+["\']?\))/i', "$1" . $prefix .  "$2$3", $newcontents );
+		$newcontents = preg_replace( '/(url\(["\']?)([^\/])([^\:\)]+["\']?\))/', "$1" . $prefix .  "$2$3", $newcontents );
+		//temp cleanup for root-relative paths that aren't caught when quoted above. should be doable in one replace above
+		$newcontents = preg_replace( '/(url\()([^"\']+)(["\'])/', "$1$3", $newcontents );
 	}
 	$contents .= $newcontents;
 }
@@ -86,4 +94,3 @@ if ($lmodified > 0) {
 
 // Deliver the file
 echo $contents;
-

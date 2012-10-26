@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__DIR__). '/testBase.php';
+require dirname(__DIR__). '/testBase.php';
 
 class quickconcat extends quickconcat_basetest
 {	
