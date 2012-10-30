@@ -12,16 +12,16 @@ class relativeUrls extends quickconcat_basetest
 }
 
 div.absolute {
-	background:url('/woaar/yes.png') repeat-y bottom;
+	background: url('/woaar/yes.png') repeat-y bottom;
 }
 span.absolute {
-	background:url(/pics/item.jpeg) repeat-y bottom;
+	background: url(/pics/item.jpeg) repeat-y bottom;
 }
 div.absolute .abc {
-	background:url(\"/img/a/img.png\") repeat-y bottom;
+	background: url(\"/img/a/img.png\") repeat-y bottom;
 }
 div.relative {
-	background:url(//test/assets/../img/layout/warehouse.png) repeat-y bottom;
+	background: url(//test/assets/../img/layout/warehouse.png) repeat-y bottom;
 }
 ";
 	$this->assertEquals(
