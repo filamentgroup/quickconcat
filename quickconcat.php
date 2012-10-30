@@ -81,6 +81,10 @@ foreach ( $files as $file ) {
 		$newcontents = preg_replace( '/(url\(["\']?)([^\/"\'])([^\:\)]+["\']?\))/i', "$1" . $prefix .  "$2$3", $newcontents );
 	}
 	$contents .= $newcontents;
+	if( $ftype === "js" ){
+		// add an extra semicolon, so ASI and non-ASI js-files will not clash
+		$contents .= ';';
+	}
 }
 
 // Set the content type and filesize headers

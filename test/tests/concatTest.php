@@ -28,7 +28,7 @@ class quickconcat extends quickconcat_basetest
 	public function testConcatJs()
 	{
 		$this->assertEquals(
-			"var a = \"a\";\nvar b = \"b\";\nvar c = \"c\";\n",
-			$this->get('quickconcat.php?files=test/assets/a.js,test/assets/b.js,test/assets/c.js'));
+			"var a = \"a\";\n;var b = \"b\";\n;var c = \"c\"\n;var d = \"d\";\n;",
+			$this->get('quickconcat.php?files=test/assets/a.js,test/assets/b.js,test/assets/c.js,test/assets/d.js'));
 	}
 }
