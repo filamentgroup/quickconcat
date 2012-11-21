@@ -10,9 +10,7 @@ quickconcat: a simple dynamic concatenator for html, css, and js files
 function is_file_in_scope( $file ){
 	$appRoot = dirname(__FILE__);
 	$realpath = realpath($file);
-	if($file && is_file($realpath) && strpos($realpath, $appRoot) === 0){
-		return true;
-	}
+	return ($file && is_file($realpath) && strpos($realpath, $appRoot) === 0);
 }
 
 // List of files, comma-separated paths
