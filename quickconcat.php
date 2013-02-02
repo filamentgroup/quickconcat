@@ -66,31 +66,32 @@ $fext = preg_match( '/\.(js|html|css)$/', $files[ 0 ], $match );
 $ftype = $fext ? $match[ 1 ] : "html";
 $type = "text/" . ( $ftype === "js" ? "javascript" : $ftype );
 
-$contents = '';
+// Set the content type and last-modified headers
+header('Content-Type: ' . $type);
+if ($lmodified > 0) {
+	header('Last-Modified: '. $lmodified);
+}
 
 // Loop through the files adding them to a string
 foreach ( $files as $file ) {
 	$open = $wrap ? "<entry url=\"". $file . "\">" : "";
 	$close = $wrap ? "</entry>\n" : "";
-	$newcontents = $open . file_get_contents($relativeroot . $file). $close;
-	//prefix relative CSS paths (TODO: HTML as well)
+	$contents = $open . file_get_contents($relativeroot . $file). $close;
+	
+	//prefix relative CSS paths
+	// TODO: HTML as well
 	if( $ftype === "css" ){
 		$prefix = $pubroot . dirname($file) . "/";
-		$newcontents = preg_replace( '/(url\(["\']?)([^\/"\'])([^\:\)]+["\']?\))/i', "$1" . $prefix .  "$2$3", $newcontents );
+		$contents = preg_replace( '/(url\(["\']?)([^\/"\'])([^\:\)]+["\']?\))/i', "$1" . $prefix .  "$2$3", $contents );
 	}
-	$contents .= $newcontents;
+	echo $contents;
+	
 	if( $ftype === "js" ){
 		// add an extra semicolon, so ASI and non-ASI js-files will not clash
-		$contents .= ';';
+		echo ';';
 	}
+	
+	// flush-ing the content will change the transfer-encoding to "chunked"
+	// and makes http-body as early as possible available to the client 
+	flush();
 }
-
-// Set the content type and filesize headers
-header('Content-Type: ' . $type);
-header('Content-Length: ' . strlen($contents));
-if ($lmodified > 0) {
-	header('Last-Modified: '. $lmodified);
-}
-
-// Deliver the file
-echo $contents;
