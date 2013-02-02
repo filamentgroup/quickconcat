@@ -72,7 +72,7 @@ if ($lmodified > 0) {
 	header('Last-Modified: '. $lmodified);
 }
 
-// Loop through the files adding them to a string
+// Loop through the files
 foreach ( $files as $file ) {
 	$open = $wrap ? "<entry url=\"". $file . "\">" : "";
 	$close = $wrap ? "</entry>\n" : "";
