@@ -74,22 +74,29 @@ if ($lmodified > 0) {
 
 // Loop through the files
 foreach ( $files as $file ) {
-	$open = $wrap ? "<entry url=\"". $file . "\">" : "";
-	$close = $wrap ? "</entry>\n" : "";
-	$contents = $open . file_get_contents($relativeroot . $file). $close;
+	echo $wrap ? "<entry url=\"". $file . "\">" : "";
 	
 	//prefix relative CSS paths
 	// TODO: HTML as well
 	if( $ftype === "css" ){
+		$contents = file_get_contents($relativeroot . $file);
+		
 		$prefix = $pubroot . dirname($file) . "/";
 		$contents = preg_replace( '/(url\(["\']?)([^\/"\'])([^\:\)]+["\']?\))/i', "$1" . $prefix .  "$2$3", $contents );
+		
+		echo $contents;
+		unset ($contents);
+	} else {
+		// all remaining types can be streamed as-is to the browser
+		readfile($file);		
 	}
-	echo $contents;
 	
 	if( $ftype === "js" ){
 		// add an extra semicolon, so ASI and non-ASI js-files will not clash
 		echo ';';
 	}
+	
+	echo $wrap ? "</entry>\n" : "";
 	
 	// flush-ing the content will change the transfer-encoding to "chunked"
 	// and makes http-body as early as possible available to the client 
