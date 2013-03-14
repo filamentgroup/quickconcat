@@ -88,7 +88,7 @@ foreach ( $files as $file ) {
 		unset ($contents);
 	} else {
 		// all remaining types can be streamed as-is to the browser
-		readfile($file);		
+		readfile($relativeroot . $file);		
 	}
 	
 	if( $ftype === "js" ){
