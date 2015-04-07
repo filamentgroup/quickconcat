@@ -1,5 +1,7 @@
 # quickconcat
 
+**NOTE** This repository has been retired and exists only as a reference.
+
 a simple dynamic concatenator for html, css, and js files, written in PHP
 
 * Copyright 2012, Scott Jehl, Filament Group, Inc. 
