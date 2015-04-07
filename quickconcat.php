@@ -7,6 +7,11 @@ quickconcat: a simple dynamic concatenator for html, css, and js files
 		* wrap (optional): Enclose each result in an element node with url attribute? False by default.
 */
 
+function remove_file_query_string( $file ){
+	$script = explode( "?", $file );
+	return $script[0];
+}
+
 function is_file_in_scope( $file ){
 	$appRoot = dirname(__FILE__);
 	$realpath = realpath($file);
@@ -35,6 +40,7 @@ $files = explode( ",", $filelist );
 
 // sanitize file-parameters
 foreach ( $files as $idx => $file ) {
+	$file = remove_file_query_string($file);
 	// we allow only certain filetypes
 	if( !( preg_match( '/\.(js|html|css)$/', $file ) && is_file_in_scope($file) ) ){
 		unset($files[$idx]);
@@ -50,6 +56,7 @@ $lmodified = 0;
 
 // build last-modified date for the file-bundle
 foreach ( $files as $file ) {
+	$file = remove_file_query_string($file);
 	$mtime = filemtime($file);
 	if($mtime > $lmodified) {
 		$lmodified = $mtime;
@@ -72,6 +79,7 @@ $contents = '';
 foreach ( $files as $file ) {
 	$open = $wrap ? "<entry url=\"". $file . "\">" : "";
 	$close = $wrap ? "</entry>\n" : "";
+	$file = remove_file_query_string($file);
 	$newcontents = $open . file_get_contents($relativeroot . $file). $close;
 	//prefix relative CSS paths (TODO: HTML as well)
 	if( $ftype === "css" ){
