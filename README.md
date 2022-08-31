@@ -1,6 +1,6 @@
-# quickconcat
+:warning: This project is archived and the repository is no longer maintained.
 
-**NOTE** This repository has been retired and exists only as a reference.
+# quickconcat
 
 a simple dynamic concatenator for html, css, and js files, written in PHP
 
